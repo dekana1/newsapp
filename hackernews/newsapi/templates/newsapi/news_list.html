@@ -1,0 +1,20 @@
+{% for news in our_news%}
+
+    <H2><a href="{% url 'news_details' news.id %}"> {{news.title}}</a></H2>
+    <P>{{news.content}}</P>
+    <small>by {{news.by}}</small>
+
+{% endfor %}
+
+
+<h1>Other news</h1>
+
+{% for story in story_ids %}
+
+<H2><a href="{% url 'hacker_news_details' story %}"> {{news.title}}</a></H2>
+<P>{{news.content}}</P>
+<small>by {{news.by}}</small>
+
+{% endfor %}
+    
+
