@@ -1,39 +1,81 @@
 from django.shortcuts import render, get_object_or_404
-from .models import OurNews
-from rest_framework import generics
-from .serializers import OurNewsSerializers
+from .models import OurNews, HNew, NewHNStories
+from rest_framework import generics, viewsets
+from .serializers import OurNewsSerializers, HNewsSerializers
 import requests
-
-# Create your views here.
-
-base_url = 'https://hacker-news.firebaseio.com/v0/'
-top_story_url = f"{base_url}topstories.json"
+import requests_cache
 
 
-payload = "{}"
-response = requests.request("GET", top_story_url, data=payload)
+# Create Cache for latest stories
 
-story_ids = response.json() 
+requests_cache.install_cache('latest_news_cache', backend='sqlite', expire_after=300)
 
-def news_list(request):
+# Get TOP Stories
+# base_url = 'https://hacker-news.firebaseio.com/v0/'
+# latest_story_url = f"{base_url}newstories.json"
+# payload = "{}"
+# response = requests.request("GET", latest_story_url, data=payload)
+
+# story_ids = response.json()  # Top story IDS
+
+# # Get LATEST STORY DETAILS
+# story_dets = {}  
     
-    context = {}
-    news = OurNews.objects.all()
+# for x in story_ids:
     
-    context['story_ids'] = story_ids
-    context['our_news'] = news
+#     story_url = f"{base_url}item/{x}.json"
+#     payload = "{}"
+#     hn_response = requests.request("GET", story_url, data=payload)
     
-    return render(request, "newsapi/news_list.html", context)
+#     story_dets[x] = hn_response.json()
 
 
-def hacker_news_details(request, story_id):
+class newsViewset(viewsets.ModelViewSet):
     
-    story_url = f"{base_url}item/{story_id}.json"
+    serializer_class = HNewsSerializers
     
-    payload = "{}"
-    hn_response = requests.request("GET", story_url, data=payload)
+    def get_queryset(self):
+        
+        data = HNew.objects.all()
+        
+        return data
     
-    return render(request, 'newsapi/hn_news_details.html', {'news': hn_response})
+    
+    def get_hnews(self):
+        url = "https://hacker-news.firebaseio.com/v0/newstories.json"
+
+        payload = "{}"
+        api_response = requests.request("GET", url, data=payload)
+        
+        try:
+            api_response.raise_for_status()
+            return api_response.json()
+
+        except:
+            return None
+        
+    def save_hnews(self):
+        
+        new_hnews_id = self.get_hnews()
+        
+        print(new_hnews_id)
+        
+        if new_hnews_id is not None:
+            try:
+                
+                print("Running For loop now")
+                
+                for x in new_hnews_id:
+                    if NewHNStories.objects.filter(hn_id=x).exists():
+                        pass
+                    else:
+                        new_hnews_id_object = NewHNStories.objects.create(hn_id=x)
+                        new_hnews_id_object.save()
+                
+                print("End of loop")
+            except:
+                pass
+
 
 
 def our_news_details(request, news_id):
@@ -45,7 +87,6 @@ def our_news_details(request, news_id):
 
 class NewsList(generics.ListCreateAPIView):
     serializer_class = OurNewsSerializers
-    
     
     def get_queryset(self):
         
