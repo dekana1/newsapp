@@ -27,12 +27,14 @@ class OurNews(models.Model):
 class NewHNStories(models.Model):
     hn_id = models.IntegerField(_("HN unique ID"))
     
-    
+    def __str__(self):
+        return f"{self.hn_id}"
+
 
 class HNew(models.Model):
     
     pk_id = models.ForeignKey(NewHNStories, verbose_name=_("HN Unique ID"), on_delete=models.CASCADE, default=1)
-    by = models.ForeignKey(User, verbose_name=_("Author"), on_delete=models.CASCADE)
+    by = models.CharField(_("Author"), max_length=50)
     score = models.IntegerField(_("News Score"))
     time_created = models.DateTimeField(_("time created"), auto_now=True)
     title = models.CharField(_("article title"), max_length=50)

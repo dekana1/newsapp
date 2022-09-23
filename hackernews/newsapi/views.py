@@ -1,33 +1,12 @@
 from django.shortcuts import render, get_object_or_404
 from .models import OurNews, HNew, NewHNStories
 from rest_framework import generics, viewsets
-from .serializers import OurNewsSerializers, HNewsSerializers
+from .serializers import OurNewsSerializers, HNewsSerializers, NewHNStoriesSerializers
 import requests
 import requests_cache
 
 
 # Create Cache for latest stories
-
-requests_cache.install_cache('latest_news_cache', backend='sqlite', expire_after=300)
-
-# Get TOP Stories
-# base_url = 'https://hacker-news.firebaseio.com/v0/'
-# latest_story_url = f"{base_url}newstories.json"
-# payload = "{}"
-# response = requests.request("GET", latest_story_url, data=payload)
-
-# story_ids = response.json()  # Top story IDS
-
-# # Get LATEST STORY DETAILS
-# story_dets = {}  
-    
-# for x in story_ids:
-    
-#     story_url = f"{base_url}item/{x}.json"
-#     payload = "{}"
-#     hn_response = requests.request("GET", story_url, data=payload)
-    
-#     story_dets[x] = hn_response.json()
 
 
 class newsViewset(viewsets.ModelViewSet):
@@ -54,6 +33,22 @@ class newsViewset(viewsets.ModelViewSet):
         except:
             return None
         
+    
+    def get_hnews_details(self, id):
+        
+        story_url = f"https://hacker-news.firebaseio.com/v0/item/{id}.json"
+        payload = "{}"
+        hn_details_response = requests.request("GET", story_url, data=payload)
+        
+        try:
+            hn_details_response.raise_for_status()
+            return hn_details_response.json()
+
+        except:
+            return None
+        
+
+
     def save_hnews(self):
         
         new_hnews_id = self.get_hnews()
@@ -66,16 +61,71 @@ class newsViewset(viewsets.ModelViewSet):
                 print("Running For loop now")
                 
                 for x in new_hnews_id:
+                    
                     if NewHNStories.objects.filter(hn_id=x).exists():
                         pass
+                    
                     else:
                         new_hnews_id_object = NewHNStories.objects.create(hn_id=x)
                         new_hnews_id_object.save()
-                
+                        
+                       
                 print("End of loop")
             except:
                 pass
+    
+    
+    
+    
+    
+    # print("hey", new_hnews_id)         
+    
+         
+    def save_hnews_dets(self):
+        
+        story_ids = NewHNStories.objects.values_list('hn_id', flat=True)
+        new_hnews_id = [*story_ids]
+        
+        if new_hnews_id is not None:
+            
+            try:
+                print("Running hnews dets ...")
+                batch_number = len(new_hnews_id) // 50
+                
+                for x in range(batch_number):
+                
+                    new_hnews_details = self.get_hnews_details(new_hnews_id[x])
+                    
+                    print("dets", new_hnews_details)
+                    
+                    s_obj = NewHNStories.objects.filter(hn_id=new_hnews_id[x])
+                    
+                    pk = HNew.objects.filter(pk_id=s_obj)
+                    print(pk)
+                    
+                    if pk.exists():
+                        pass
+                    else:
+                        details_object = HNew.objects.create(pk_id=pk, by=new_hnews_details['by'], score=new_hnews_details['score'], time_created=new_hnews_details['time'],
+                                            title=new_hnews_details['title'], type=new_hnews_details['type'], url=new_hnews_details['url'])
+                        details_object.save()
+                        
+                        print("saved...")
+                    
+                    # new_hnews_id.remove(new_hnews_id[x])
+                    
+            except:
+                pass
+                    
+                    
+def home(request):
+    
+    context = {}
+    
+    our_news = OurNews.objects.all()
+    hnews = HNew.objects.all()
 
+    return render(request, 'newsapi/news_list.html', {'our_news': our_news, 'HNews': hnews})
 
 
 def our_news_details(request, news_id):
@@ -98,7 +148,6 @@ class NewsList(generics.ListCreateAPIView):
             
         return queryset
     
-
 
 class NewsDetails(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = OurNewsSerializers

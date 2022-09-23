@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import OurNews, HNew
+from .models import OurNews, HNew, NewHNStories
 
 
 class OurNewsSerializers(serializers.ModelSerializer):
@@ -11,4 +11,10 @@ class OurNewsSerializers(serializers.ModelSerializer):
 class HNewsSerializers(serializers.ModelSerializer):
     class Meta:
         model = HNew
+        fields = ('__all__')
+        
+        
+class NewHNStoriesSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = NewHNStories
         fields = ('__all__')
