@@ -2,9 +2,9 @@
 
 {% block content %} 
 
-    <div class="container" style="margin-top: 100px;">
+    <div class="container" style="margin-top: 60px;">
 
-        <div class="card">
+        <div class="card" style="margin-bottom: 60px;">
             <div class="card-header">
                 Our News
             </div>
@@ -30,7 +30,7 @@
             
         </div>
 
-        <div class="card">
+        <div class="card" style="margin-bottom: 60px;">
             <div class="card-header">
                 Other News
             </div>
@@ -39,16 +39,16 @@
 
                 <ul class="list-group list-group-flush">
         
-                    <!-- {% for news in our_news %}
+                    {% for news in HNews %}
         
                         <li class="list-group-item">
                             
-                            <a href="{% url 'our_news_details' news.id %}">{{news.title}}</a> <br>
+                            <a href="{{news.url}}">{{news.title}}</a> <br>
                             <small>by {{news.by}}</small>
                             
                         </li>
         
-                    {% endfor %} -->
+                    {% endfor %}
                 </ul>
         
                 

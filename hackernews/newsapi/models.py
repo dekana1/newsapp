@@ -33,7 +33,8 @@ class NewHNStories(models.Model):
 
 class HNew(models.Model):
     
-    pk_id = models.ForeignKey(NewHNStories, verbose_name=_("HN Unique ID"), on_delete=models.CASCADE, default=1)
+    # pk_id = models.ForeignKey(NewHNStories, verbose_name=_("HN Unique ID"), on_delete=models.CASCADE, default=1)
+    pk_id = models.IntegerField(_("HN unique ID"))
     by = models.CharField(_("Author"), max_length=50)
     score = models.IntegerField(_("News Score"))
     time_created = models.DateTimeField(_("time created"), auto_now=True)
@@ -44,3 +45,16 @@ class HNew(models.Model):
     
     def __str__(self):
         return f"{self.title} written by {self.by}"
+    
+    
+class Comments(models.Model):
+    type = models.CharField(_("article type"), max_length=10, choices=ARTICLE_CHOICES, default=3)
+    by = models.ForeignKey(User, verbose_name=_("Author"), on_delete=models.CASCADE)
+    time = models.DateTimeField(_("Time Created"), auto_now=True)
+    parent = models.ForeignKey(OurNews, verbose_name=_("Article"), on_delete=models.CASCADE)
+    text = models.CharField(_("Comment"), max_length=250)
+    
+    def __str__(self):
+        return f"Comment written by {self.by}"
+    
+    
