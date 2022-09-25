@@ -157,6 +157,14 @@ def search(request):
         return render(request, 'newsapi/search_result.html')
 
 
+def catergory(request, cats):
+    
+    catergory_our_news = OurNews.objects.filter(type=cats)
+    catergory_h_news = HNew.objects.filter(type=cats)
+    
+    return render(request, 'newsapi/catergories.html', {'cats': cats, 'our_news_results': catergory_our_news, 'h_news_results': catergory_h_news})
+    
+    
 def write_comment(request):
     
     if request.method == 'POST':
@@ -171,6 +179,8 @@ def write_comment(request):
     
     return HttpResponse("thanks")
     
+    
+
 class NewsList(generics.ListCreateAPIView):
     serializer_class = OurNewsSerializers
     pagination_class = LimitOffsetPagination

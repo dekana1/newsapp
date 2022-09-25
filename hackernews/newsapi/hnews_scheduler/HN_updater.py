@@ -15,7 +15,7 @@ def run_update():
     
     for x in range(5):
         
-        print("from scheduler.py", x)
+        print("from scheduler.py", hnews_list[x])
         
         if HNew.objects.filter(pk_id=hnews_list[x]).exists():
             

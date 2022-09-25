@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% block content %} 
+
+    <div class="container" style="margin-top: 60px;">
+        
+        <div class="card" style="margin-bottom: 60px;">
+
+            {% if our_news_results or catergory_h_news %}
+                <div class="card-header">
+                   Articles by {{cats}} 
+                </div>
+                
+                <div class="card-body">
+
+                    <ul class="list-group list-group-flush">
+                        <p><strong>From Our News</strong></p>
+
+                        {% if our_news_results %}
+                            {% for result in our_news_results %}
+                
+                                <li class="list-group-item">
+                                    
+                                    <a href="{% url 'our_news_details' result.id %}">{{result.title}}</a> <span class="badge text-bg-light"> {{result.type}}</span><br>
+                                    <small>by {{result.by}}</small>
+                                    
+                                </li>
+                
+                            {% endfor %}
+
+                        {% else %}
+                            <p><small>Didn't find any post under that catergory</small></p>
+                        {% endif %}
+                    </ul>
+            
+                    
+                </div>
+
+                <div class="card-body">
+                    <p><strong>From other news sources</strong></p>
+                    <ul class="list-group list-group-flush">
+                        {% if catergory_h_news %}
+                            {% for result in catergory_h_news %}
+                
+                                <li class="list-group-item">
+                                    
+                                    <a href="{{result.url}}">{{result.title}}</a> <span class="badge text-bg-primary">{{result.type}}</span> <br>
+                                    <small>by {{result.by}}</small>
+                                    
+                                </li>
+                
+                            {% endfor %}
+                        {% else %}
+
+                        <p><small>Didn't find any post any posts under that catergory</small></p>
+                        
+                        {% endif %}
+                    </ul>
+            
+                    
+                </div>
+                
+            {% else %}
+            <div class="card-body">
+                <p>
+                    That catergory does not exist ...
+                </p>
+            </div>
+                
+            {% endif %}
+        </div>
+
+       
+    </div>
+    
+{% endblock %}
