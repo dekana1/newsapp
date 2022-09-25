@@ -13,7 +13,7 @@ def run_update():
     
     # print(hnews_list)
     
-    for x in range(5):
+    for x in range(50):
         
         print("from scheduler.py", hnews_list[x])
         
