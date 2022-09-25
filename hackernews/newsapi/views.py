@@ -2,6 +2,7 @@ from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse, HttpResponse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from .models import OurNews, HNew, NewHNStories, Comments
+from django.contrib.auth.decorators import login_required
 from rest_framework import generics, viewsets
 from rest_framework.pagination import LimitOffsetPagination
 from .serializers import OurNewsSerializers, HNewsSerializers, NewHNStoriesSerializers
@@ -103,7 +104,7 @@ class newsViewset(viewsets.ModelViewSet):
                 except:
                     pass
                       
-                    
+@login_required                  
 def home(request):
     
     context = {}
@@ -120,6 +121,7 @@ def home(request):
     return render(request, 'newsapi/news_list.html', {'our_news': o_news})
 
 
+@login_required
 def other_news(request):
     
     context = {}
@@ -134,6 +136,7 @@ def other_news(request):
     return render(request, 'newsapi/hnews.html', {'h_news': h_news})
 
 
+@login_required
 def our_news_details(request, news_id):
     
     our_news = get_object_or_404(OurNews, id=news_id)
@@ -142,6 +145,7 @@ def our_news_details(request, news_id):
     return render(request, 'newsapi/our_news_details.html', {'news': our_news, "comments": comments})
 
 
+@login_required
 def search(request):
     
     if request.method == 'POST':
@@ -157,6 +161,7 @@ def search(request):
         return render(request, 'newsapi/search_result.html')
 
 
+@login_required
 def catergory(request, cats):
     
     catergory_our_news = OurNews.objects.filter(type=cats)
@@ -165,6 +170,7 @@ def catergory(request, cats):
     return render(request, 'newsapi/catergories.html', {'cats': cats, 'our_news_results': catergory_our_news, 'h_news_results': catergory_h_news})
     
     
+@login_required  
 def write_comment(request):
     
     if request.method == 'POST':
@@ -194,8 +200,8 @@ class NewsList(generics.ListCreateAPIView):
             queryset = OurNews.objects.filter(type=type)
             
         return queryset
+   
     
-
 class NewsDetails(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = OurNewsSerializers
     queryset = OurNews.objects.all()
