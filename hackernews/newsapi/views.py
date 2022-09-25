@@ -1,4 +1,5 @@
 from django.shortcuts import render, get_object_or_404
+from django.http import JsonResponse, HttpResponse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from .models import OurNews, HNew, NewHNStories, Comments
 from rest_framework import generics, viewsets
@@ -55,7 +56,7 @@ class newsViewset(viewsets.ModelViewSet):
         
         new_hnews_id = self.get_hnews()
         
-        print(new_hnews_id)
+        # print(new_hnews_id)
         
         if new_hnews_id is not None:
             try:
@@ -77,72 +78,60 @@ class newsViewset(viewsets.ModelViewSet):
                 pass
     
          
-    def save_hnews_dets(self):
+    def save_hnews_dets(self, pk_id):
         
-        story_ids = NewHNStories.objects.values_list('hn_id', flat=True)
-        new_hnews_id = {*story_ids}
-        
-        
-        if new_hnews_id is not None:
-            print(news_hnews_id)
+        if HNew.objects.filter(pk_id=pk_id).exists():
+            pass
             
-            existing = {ids.pk_id for ids in HNew.objects.all()}
-            print(existing)
-            try:
-                print("Running hnews dets ...")
+        else:
+            
+            hnews_data = self.get_hnews_details(pk_id)
+            
+            if hnews_data is not None:
                 
-                news_hnews_id = new_hnews_id.remove(existing)
-                batch_number = len(new_hnews_id)
-                
-                print(batch_number)
-                
-                for x in range(batch_number):
-                
-                    new_hnews_details = self.get_hnews_details(new_hnews_id[x])
-                    print("dets", new_hnews_details)
+                try:
+
+                    print("In hnews data")
                     
-                    details_object = HNew.objects.create(pk_id=new_hnews_id[x], by=new_hnews_details['by'], score=new_hnews_details['score'], time_created=new_hnews_details['time'],
-                                        title=new_hnews_details['title'], type=new_hnews_details['type'], url=new_hnews_details['url'])
-                    details_object.save()
+                    print(hnews_data)
                     
-                    print("saved...")
+                    new_hnews_object = HNew.objects.create(pk_id=hnews_data['id'], by=hnews_data['by'], score=hnews_data['score'], time_created=hnews_data['time'],
+                                                            title=hnews_data['title'], type=hnews_data['type'], url=hnews_data['url'])
+                    new_hnews_object.save()
+                    print("Saved HNews data")
                     
-                    
-            except:
-                pass
-                    
+                except:
+                    pass
+                      
                     
 def home(request):
     
     context = {}
     
-    our_news = OurNews.objects.all()
-    # our_news_paginator = Paginator(our_news, 5)
+    our_news = OurNews.objects.all().order_by('time_created')
+    our_news_paginator = Paginator(our_news, 5)
+    page = request.GET.get('page')
     
-    # page = request.GET.get('page')
     
-    # try:
-    #     o_news = our_news_paginator.page(page)
-        
-    # except PageNotAnInteger:
-    #     o_news = our_news_paginator.page(1)
+    o_news = our_news_paginator.get_page(page)
     
-    # except EmptyPage:
-    #     o_news = our_news_paginator.page(paginator.num_pages)
-        
-    hnews = HNew.objects.all()
-    # hnews_paginator = Paginator(hnews, 5)
     
-    # try:
-    #     h_news = hnews_paginator.page(page)
-        
-    # except PageNotAnInteger:
-    #     h_news = hnews_paginator.page(1)
-    
-    # except EmptyPage:
-    #     h_news = hnews_paginator.page(paginator.num_pages)
 
-    return render(request, 'newsapi/news_list.html', {'our_news': our_news, 'HNews': hnews})
+    return render(request, 'newsapi/news_list.html', {'our_news': o_news})
+
+
+def other_news(request):
+    
+    context = {}
+    
+    hnews = HNew.objects.all().order_by('time_created')
+    hnews_paginator = Paginator(hnews, 2)
+    page = request.GET.get('page')
+    
+    h_news = hnews_paginator.get_page(page)
+    
+
+    return render(request, 'newsapi/hnews.html', {'h_news': h_news})
 
 
 def our_news_details(request, news_id):
@@ -160,13 +149,27 @@ def search(request):
         search_bar = request.POST['search-bar']
         
         our_news  = OurNews.objects.filter(title__contains=search_bar)
+        h_news = HNew.objects.filter(title__contains=search_bar)
         
-        
-        return render(request, 'newsapi/search_result.html', {'search_bar': search_bar, "results": our_news})
+        return render(request, 'newsapi/search_result.html', {'search_bar': search_bar, "Our_new_results": our_news, "Hnew_results": h_news})
     
     else:
         return render(request, 'newsapi/search_result.html')
+
+
+def write_comment(request):
     
+    if request.method == 'POST':
+        
+        text = request.POST['text']
+        parent = request.POST['parent']
+        
+        article = OurNews.objects.get(id=parent)
+        
+        new_comment = Comments(type='comment', by=request.user, parent=article, text=text)
+        new_comment.save()
+    
+    return HttpResponse("thanks")
     
 class NewsList(generics.ListCreateAPIView):
     serializer_class = OurNewsSerializers

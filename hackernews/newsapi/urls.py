@@ -9,6 +9,8 @@ router.register('data', newsViewset, basename='HNews-data')
 
 urlpatterns = [
     path("", views.home, name="home"),
+    path("other-news/", views.other_news, name="other_news"),
+    path("newscomment/", views.write_comment, name="write_comment"),
     path("search", views.search, name="search"),
     path("api/", include(router.urls)),
     path("<int:news_id>", views.our_news_details, name="our_news_details"),

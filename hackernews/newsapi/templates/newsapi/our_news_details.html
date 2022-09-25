@@ -1,8 +1,9 @@
 {% extends 'base.html' %}
-
+{% load static %}
 {% block content %} 
     <div class="container" style="margin-top: 100px;">
         <div class="card-header">
+            
             <h2>{{news.title}}</h2>
         <small> wriiten by {{news.by}}</small>
         </div>
@@ -18,7 +19,7 @@
     </div>
 
 
-    <div class="card" style="margin-top: 100px;">
+    <div class="card" style="margin-top: 100px; margin-bottom: 100px;">
         <div class="card-header">
             Comments
         </div>
@@ -29,9 +30,12 @@
                 {% if comments %}
                 <ul class="list-group list-group-flush">
                     {% for comment in comments %}
-
-                        <p>{{comment.by}}</p>
-                        <li class="list-group-item">{{comments.text}}</li>
+                        
+                        
+                        <li class="list-group-item">
+                            <small>From {{comment.by}}</small>
+                            <p>{{comment.text}}</p>
+                        </li>
                     {% endfor %}
                 </ul>
                 {% else %}
@@ -46,19 +50,40 @@
         </div>
 
         <div class="container">
-            <form >
+            <form method="post" action="" id="form-comment">
                 {% csrf_token %}
-                <label for="exampleFormControlInput1" class="form-label">Leave a Comment</label>
+                <label for="exampleFormControlInput1" class="form-label" >Leave a Comment</label>
                 <div class="mb-3 input-group">
-                    
-                    <input type="text" class="form-control" id="exampleFormControlInput1" placeholder="Great content...">
-
-                    <button class="btn btn-outline-secondary" type="button">Button</button>
+                    <input type="hidden" id="news_id" value="{{news.id}}">
+                    <input type="text" class="form-control" id="comment_text" placeholder="Great content...">
+                    <button class="btn btn-outline-secondary" type="submit" id="comment-btn">Post</button>
                 </div>                
                   
                   
 
             </form>
         </div>
+        <script src="{% static 'js/jquery-3.6.0.min.js' %}"></script>
+        <script>
+            $(document).on('submit', '#form-comment', function(e){
+                e.preventDefault();
+                $.ajax({
+                    type: "post",
+                    url: "newscomment/",
+                    data: {
+                        csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
+                        text: $('#comment_text').val(),
+                        parent: $('#news_id').val(),
 
+                    }, 
+                    success: function (data){
+                        
+                        $('#form-comment').each(function(){
+                            this.reset();
+                        });
+                    }
+
+                });
+            });
+        </script>
 {% endblock %}

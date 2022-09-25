@@ -5,6 +5,7 @@
     <div class="container" style="margin-top: 60px;">
         
         <div class="card" style="margin-bottom: 60px;">
+
             {% if search_bar %}
                 <div class="card-header">
                     Results for : {{search_bar}}
@@ -13,17 +14,47 @@
                 <div class="card-body">
 
                     <ul class="list-group list-group-flush">
+                        <p><strong>From Our News</strong></p>
+
+                        {% if Our_new_results %}
+                            {% for result in Our_new_results %}
+                
+                                <li class="list-group-item">
+                                    
+                                    <a href="{% url 'our_news_details' result.id %}">{{result.title}}</a> <br>
+                                    <small>by {{result.by}}</small>
+                                    
+                                </li>
+                
+                            {% endfor %}
+
+                        {% else %}
+                            <p><small>Didn't find any post in our news data.</small></p>
+                        {% endif %}
+                    </ul>
             
-                        {% for result in results %}
-            
-                            <li class="list-group-item">
-                                
-                                <a href="{% url 'our_news_details' result.id %}">{{result.title}}</a> <br>
-                                <small>by {{result.by}}</small>
-                                
-                            </li>
-            
-                        {% endfor %}
+                    
+                </div>
+
+                <div class="card-body">
+                    <p><strong>From other news sources</strong></p>
+                    <ul class="list-group list-group-flush">
+                        {% if Hnew_results %}
+                            {% for result in Hnew_results %}
+                
+                                <li class="list-group-item">
+                                    
+                                    <a href="{{result.url}}">{{result.title}}</a> <br>
+                                    <small>by {{result.by}}</small>
+                                    
+                                </li>
+                
+                            {% endfor %}
+                        {% else %}
+
+                        <p><small>Didn't find any post in other news data.</small></p>
+                        
+                        {% endif %}
                     </ul>
             
                     

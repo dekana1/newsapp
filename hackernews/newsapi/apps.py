@@ -12,3 +12,4 @@ class NewsapiConfig(AppConfig):
         from .hnews_scheduler import HN_updater
         
         HN_updater.run_update()
+        # HN_updater.get_hnews_data()
